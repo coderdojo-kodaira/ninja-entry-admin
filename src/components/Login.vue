@@ -31,19 +31,19 @@
                 </h1>
                 <div class="login-form">
                   <p class="control has-icon has-icon-right">
-                    <input class="input email-input" type="text" placeholder="id">
+                    <input class="input email-input" type="text" placeholder="id" v-model="loginId">
                     <span class="icon user">
                       <i class="fa fa-user"></i>
                     </span>
                   </p>
                   <p class="control has-icon has-icon-right">
-                    <input class="input password-input" type="password" placeholder="password">
+                    <input class="input password-input" type="password" placeholder="password" v-model="password">
                     <span class="icon user">
                       <i class="fa fa-lock"></i>
                     </span>
                   </p>
                   <p class="control login">
-                    <button class="button is-success is-outlined is-large is-fullwidth">Login</button>
+                    <button class="button is-success is-outlined is-large is-fullwidth" v-on:click="checkLogin">Login</button>
                   </p>
                 </div>
                 <div class="section forgot-password">
@@ -60,6 +60,68 @@
 </template>
 
 <script>
+var awsCredential = require('./credentials/aws.json')
+var AWS = require('aws-sdk')
+AWS.config.update(awsCredential)
+var s3 = new AWS.S3({ apiVersion: '2006-03-01', region: 'ap-northeast-1' })
+
+var bucketName = 'dev-ninja-entry'
+var CryptoJS = require('crypto-js')
+
+export default {
+  name: 'hello',
+  data () {
+    return {
+      msg: 'Welcome to Your Vue.js App',
+      loginId: '',
+      password: ''
+    }
+  },
+  methods: {
+    // ログインチェック
+    checkLogin () {
+      var loginId = this.loginId
+      var password = this.password
+
+      var router = this.$router
+
+      // S3からアカウント情報が書かれているJSONを取得
+      Promise.resolve(0)
+      .then((d) => {
+        return new Promise((resolve, reject) => {
+          var params = {
+            Bucket: bucketName,
+            Key: 'master/login.json'
+          }
+          s3.getObject(params, (err, data) => {
+            if (err) {
+              console.log(err, err.stack)
+              reject(err)
+            } else {
+              var loginData = JSON.parse(data.Body.toString('UTF-8'))
+              resolve(loginData)
+            }
+          })
+        })
+      })
+      // IDとパスワードを突き合わせ
+      .then((loginData) => {
+        var decryptPassword = CryptoJS.AES.decrypt(loginData[loginId], 'dojo').toString(CryptoJS.enc.Utf8)
+
+        if (decryptPassword === password) {
+          // あっていれば、一覧画面に遷移
+          router.push('/entries')
+        } else {
+          // 間違っていれば、アラートを出す
+          alert('IDもしくはパスワードが違います')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }
+  }
+}
 
 </script>
 

@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
+    "aws-sdk": "^2.71.0",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
     "babel-loader": "^6.2.10",
@@ -35,6 +36,7 @@
     "copy-webpack-plugin": "^4.0.1",
     "cross-env": "^4.0.0",
     "cross-spawn": "^5.0.1",
+    "crypto-js": "^3.1.9-1",
     "css-loader": "^0.28.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^6.2.1",
